@@ -9,6 +9,8 @@ import { SidebarTrigger } from "./ui/sidebar";
 import { Logout } from "./logout";
 import { ModeToggle } from "./mode-toggle";
 import { Fragment } from "react";
+import { Button } from "./ui/button";
+import Link from "next/link";
 
 interface PageWrapperProps {
   children: React.ReactNode;
@@ -46,6 +48,11 @@ export function PageWrapper({ children, breadcrumbs }: PageWrapperProps) {
 
           <div className="flex items-center gap-4">
             <ModeToggle />
+            <Button asChild variant="outline">
+                <Link href="/">
+                    <span>Home</span>
+                </Link>
+            </Button>
             <Logout />
           </div>
         </div>

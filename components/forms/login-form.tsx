@@ -34,6 +34,7 @@ import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useAuth } from "@/context/AuthContext"
 
 export function LoginForm({
   className,
@@ -41,6 +42,7 @@ export function LoginForm({
 }: React.ComponentProps<"div">) {
 
    const router = useRouter()
+   const {setUser} = useAuth()
   const [isLoading, setIsLoading] = useState(false) 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -51,21 +53,29 @@ export function LoginForm({
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      setIsLoading(true)
-      const response = await signInUser(values.email, values.password)
-      if(response.success) {
-        toast.success(response.message)
-        router.push("/dashboard")
-      } else {
-        toast.error(response.message)
+  try {
+    setIsLoading(true)
+    const response = await signInUser(values.email, values.password)
+
+    if (response.success) {
+      // ✅ Save user in localStorage and context
+      if (response.user) {
+        localStorage.setItem("user", JSON.stringify(response.user))
+        setUser(response.user)
       }
-    } catch (error) {
-      console.error("Login failed:", error)
-    } finally {
-      setIsLoading(false)
+
+      toast.success(response.message)
+      router.push("/dashboard")
+    } else {
+      toast.error(response.message)
     }
+  } catch (error) {
+    console.error("Login failed:", error)
+  } finally {
+    setIsLoading(false)
   }
+}
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>

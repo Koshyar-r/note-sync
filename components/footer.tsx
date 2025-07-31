@@ -10,9 +10,9 @@ export default function Footer() {
           aria-label="go home"
           className="mx-auto size-fit flex items-center gap-2"
         >
-          <Image src="/noteforge-logo.png" alt="logo" width={60} height={60} />
+          <Image src="/notes.png" alt="logo" width={30} height={30} />
 
-          <span className="text-2xl font-bold">NoteSync</span>
+          <span className="text-3xl font-bold">NoteSync</span>
         </Link>
 
         <span className="text-muted-foreground block text-center text-sm">

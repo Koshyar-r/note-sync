@@ -22,7 +22,7 @@ export default async function NotebookPage({ params }: { params: Params }) {
         },
       ]}
     >
-      <h1>{notebook?.name}</h1>
+      <h1 className="text-3xl">{notebook?.name}</h1>
 
       <CreateNoteButton notebookId={notebookId} />
 

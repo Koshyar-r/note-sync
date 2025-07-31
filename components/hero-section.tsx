@@ -45,7 +45,7 @@ export default function HeroSection() {
                   as="h1"
                   className="mt-8 max-w-2xl text-balance text-5xl font-medium md:text-6xl lg:mt-16"
                 >
-                  🔥 Forge Smarter Notes. Code Better.
+                  Sync Smarter. Think Sharper.
                 </TextEffect>
                 <TextEffect
                   per="line"
@@ -55,9 +55,9 @@ export default function HeroSection() {
                   as="p"
                   className="mt-8 max-w-2xl text-pretty text-lg"
                 >
-                  Supercharge your workflow with NoteForge — the smartest way to
-                  capture, organize, and link dev notes, code snippets, and
-                  technical insights.
+                  NoteSync is your intelligent, distraction-free space to capture ideas, code snippets, and tasks — instantly synced, always accessible, and built for deep focus.
+
+
                 </TextEffect>
 
                 <AnimatedGroup
@@ -84,7 +84,7 @@ export default function HeroSection() {
                       className="rounded-xl px-5 text-base"
                     >
                       <Link href="/dashboard">
-                        <span className="text-nowrap">Start Forging</span>
+                        <span className="text-nowrap">Write Now✍️</span>
                       </Link>
                     </Button>
                   </div>

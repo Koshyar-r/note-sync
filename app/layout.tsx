@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { AuthProvider } from "@/context/AuthContext";
 // import { Analytics } from "@vercel/analytics/react";
 
 const geistSans = Geist({
@@ -17,9 +18,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NoteForge - Your Dev Note-Taking App",
+  title: "NoteSync",
   description:
-    "NoteForge is a digital notebook that allows you to take notes, create notebooks, and more.",
+    "Sync your notes with NoteSync.",
 };
 
 export default function RootLayout({
@@ -32,7 +33,8 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <NuqsAdapter>
+        <AuthProvider>
+          <NuqsAdapter>
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
@@ -43,6 +45,7 @@ export default function RootLayout({
             {children}
           </ThemeProvider>
         </NuqsAdapter>
+        </AuthProvider>
         {/* <Analytics /> */}
       </body>
     </html>
