@@ -44,7 +44,6 @@ interface RichTextEditorProps {
 }
 
 const RichTextEditor = ({ content, noteId }: RichTextEditorProps) => {
-  const [linkUrl, setLinkUrl] = useState("")
 
   const editor = useEditor({
     extensions: [

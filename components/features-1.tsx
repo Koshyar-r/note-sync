@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Anvil, FlashlightIcon, Joystick, PanelTop, Zap } from 'lucide-react'
+import { Anvil, Joystick, PanelTop } from 'lucide-react'
 import { ReactNode } from 'react'
 
 export default function Features() {

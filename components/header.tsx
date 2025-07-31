@@ -17,7 +17,7 @@ export const HeroHeader = () => {
 
   const { scrollYProgress } = useScroll();
 
-  const { user, setUser } = useAuth();
+  const { user} = useAuth();
 
   React.useEffect(() => {
     const unsubscribe = scrollYProgress.on("change", (latest) => {

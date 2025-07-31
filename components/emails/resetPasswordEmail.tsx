@@ -47,7 +47,7 @@ const PasswordResetEmail = ({userName, resetUrl, requestTime}: PasswordResetEmai
                     We recieved a request to reset your password {requestTime}. If this was you, click the button below to reset your password.
               </Text>
               <Text className="text-[16px] text-gray-800 mb-[24px] m-0">
-                If you didn't request this password reset, you can safely ignore this email. Your password will remain unchanged.
+                If you didn&apos;t request this password reset, you can safely ignore this email. Your password will remain unchanged.
               </Text>
             </Section>
 
@@ -64,7 +64,7 @@ const PasswordResetEmail = ({userName, resetUrl, requestTime}: PasswordResetEmai
             {/* Alternative Link */}
             <Section className="mb-[32px]">
               <Text className="text-[14px] text-gray-600 mb-[8px] m-0">
-                If the button doesn't work, copy and paste this link into your browser:
+                If the button doesn&apos;t work, copy and paste this link into your browser:
               </Text>
               <Link
                 href={resetUrl}
@@ -86,7 +86,7 @@ const PasswordResetEmail = ({userName, resetUrl, requestTime}: PasswordResetEmai
                 • The link can only be used once
               </Text>
               <Text className="text-[14px] text-yellow-800 mb-[8px] m-0">
-                • If you didn't request this, please check your account security
+                • If you didn&apos;t request this, please check your account security
               </Text>
               <Text className="text-[14px] text-yellow-800 m-0">
                 • Never share this reset link with anyone
@@ -99,7 +99,7 @@ const PasswordResetEmail = ({userName, resetUrl, requestTime}: PasswordResetEmai
                 <strong>Need help?</strong>
               </Text>
               <Text className="text-[14px] text-gray-600 mb-[8px] m-0">
-                If you're having trouble resetting your password or suspect unauthorized access to your account, please contact our support team immediately.
+                If you&apos;re having trouble resetting your password or suspect unauthorized access to your account, please contact our support team immediately.
               </Text>
               <Text className="text-[14px] text-gray-600 m-0">
                 <Link href="mailto:support@example.com" className="text-blue-600">
