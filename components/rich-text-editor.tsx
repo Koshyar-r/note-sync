@@ -33,7 +33,7 @@ import {
   SubscriptIcon,
 } from "lucide-react"
 import { updateNote } from "@/server/notes"
-import { useCallback, useState } from "react"
+import { useCallback } from "react"
 import ListItem from "@tiptap/extension-list-item"
 import BulletList from "@tiptap/extension-bullet-list"
 import OrderedList from "@tiptap/extension-ordered-list"
