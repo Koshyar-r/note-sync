@@ -33,7 +33,7 @@ import {
   SubscriptIcon,
 } from "lucide-react"
 import { updateNote } from "@/server/notes"
-import { useCallback } from "react"
+import { useCallback, useState } from "react"
 import ListItem from "@tiptap/extension-list-item"
 import BulletList from "@tiptap/extension-bullet-list"
 import OrderedList from "@tiptap/extension-ordered-list"
@@ -44,6 +44,7 @@ interface RichTextEditorProps {
 }
 
 const RichTextEditor = ({ content, noteId }: RichTextEditorProps) => {
+  const [linkUrl, setLinkUrl] = useState("")
 
   const editor = useEditor({
     extensions: [
@@ -220,264 +221,314 @@ const RichTextEditor = ({ content, noteId }: RichTextEditorProps) => {
   }, [editor])
 
   return (
-    <div className="w-full max-w-7xl bg-card text-card-foreground rounded-lg overflow-hidden border">
-      {/* Toolbar */}
-      <div className="flex items-center gap-1 p-2 bg-muted/50 border-b">
-        {/* Undo/Redo */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => editor?.chain().focus().undo().run()}
-          disabled={!editorState?.canUndo}
-          className="size-8 p-0 text-muted-foreground hover:text-foreground hover:bg-accent"
-        >
-          <Undo className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => editor?.chain().focus().redo().run()}
-          disabled={!editorState?.canRedo}
-          className="size-8 p-0 text-muted-foreground hover:text-foreground hover:bg-accent"
-        >
-          <Redo className="h-4 w-4" />
-        </Button>
-        <div className="w-px h-6 bg-border mx-1" />
+    <div className="w-full max-w-none lg:max-w-7xl bg-card text-card-foreground rounded-lg overflow-hidden border mx-auto">
+      {/* Toolbar - Responsive with horizontal scroll on mobile */}
+      <div className="overflow-x-auto bg-muted/50 border-b">
+        <div className="flex items-center gap-1 p-2 min-w-max">
+          {/* Undo/Redo */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor?.chain().focus().undo().run()}
+            disabled={!editorState?.canUndo}
+            className="size-8 p-0 text-muted-foreground hover:text-foreground hover:bg-accent flex-shrink-0"
+          >
+            <Undo className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor?.chain().focus().redo().run()}
+            disabled={!editorState?.canRedo}
+            className="size-8 p-0 text-muted-foreground hover:text-foreground hover:bg-accent flex-shrink-0"
+          >
+            <Redo className="h-4 w-4" />
+          </Button>
+          <div className="w-px h-6 bg-border mx-1 flex-shrink-0" />
 
-        {/* Heading Dropdown */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+          {/* Heading Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-accent gap-1 flex-shrink-0 min-w-[60px]"
+              >
+                <span className="hidden sm:inline">{getActiveHeading()}</span>
+                <span className="sm:hidden">H</span>
+                <ChevronDown className="h-3 w-3" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="bg-popover border">
+              <DropdownMenuItem
+                onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}
+                className="text-popover-foreground hover:bg-accent hover:text-accent-foreground"
+              >
+                Heading 1
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
+                className="text-popover-foreground hover:bg-accent hover:text-accent-foreground"
+              >
+                Heading 2
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}
+                className="text-popover-foreground hover:bg-accent hover:text-accent-foreground"
+              >
+                Heading 3
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => editor?.chain().focus().setParagraph().run()}
+                className="text-popover-foreground hover:bg-accent hover:text-accent-foreground"
+              >
+                Paragraph
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Lists */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor?.chain().focus().toggleBulletList().run()}
+            className={`size-8 p-0 hover:bg-accent flex-shrink-0 ${
+              editorState?.isBulletList
+                ? "bg-accent text-accent-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <List className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor?.chain().focus().toggleOrderedList().run()}
+            className={`size-8 p-0 hover:bg-accent flex-shrink-0 ${
+              editorState?.isOrderedList
+                ? "bg-accent text-accent-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <ListOrdered className="h-4 w-4" />
+          </Button>
+          <div className="w-px h-6 bg-border mx-1 flex-shrink-0" />
+
+          {/* Text Formatting */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor?.chain().focus().toggleBold().run()}
+            disabled={!editorState?.canBold}
+            className={`size-8 p-0 hover:bg-accent flex-shrink-0 ${
+              editorState?.isBold ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Bold className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor?.chain().focus().toggleItalic().run()}
+            disabled={!editorState?.canItalic}
+            className={`size-8 p-0 hover:bg-accent flex-shrink-0 ${
+              editorState?.isItalic ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Italic className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor?.chain().focus().toggleStrike().run()}
+            disabled={!editorState?.canStrike}
+            className={`size-8 p-0 hover:bg-accent flex-shrink-0 ${
+              editorState?.isStrike ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Strikethrough className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor?.chain().focus().toggleCode().run()}
+            disabled={!editorState?.canCode}
+            className={`size-8 p-0 hover:bg-accent flex-shrink-0 ${
+              editorState?.isCode ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Code className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor?.chain().focus().toggleUnderline().run()}
+            disabled={!editorState?.canUnderline}
+            className={`size-8 p-0 hover:bg-accent flex-shrink-0 ${
+              editorState?.isUnderline
+                ? "bg-accent text-accent-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <UnderlineIcon className="h-4 w-4" />
+          </Button>
+          <div className="w-px h-6 bg-border mx-1 flex-shrink-0" />
+
+          {/* Additional Tools */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleLink}
+            className={`size-8 p-0 hover:bg-accent flex-shrink-0 ${
+              editorState?.isLink ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <LinkIcon className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor?.chain().focus().toggleSuperscript().run()}
+            className={`size-8 p-0 hover:bg-accent flex-shrink-0 ${
+              editorState?.isSuperscript
+                ? "bg-accent text-accent-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <SuperscriptIcon className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor?.chain().focus().toggleSubscript().run()}
+            className={`size-8 p-0 hover:bg-accent flex-shrink-0 ${
+              editorState?.isSubscript
+                ? "bg-accent text-accent-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <SubscriptIcon className="h-4 w-4" />
+          </Button>
+          <div className="w-px h-6 bg-border mx-1 flex-shrink-0" />
+
+          {/* Alignment - Hidden on mobile, visible on tablet+ */}
+          <div className="hidden md:flex items-center gap-1">
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-accent gap-1"
+              onClick={() => editor?.chain().focus().setTextAlign("left").run()}
+              className={`size-8 p-0 hover:bg-accent flex-shrink-0 ${
+                editorState?.isAlignLeft
+                  ? "bg-accent text-accent-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
             >
-              {getActiveHeading()}
-              <ChevronDown className="h-3 w-3" />
+              <AlignLeft className="h-4 w-4" />
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="bg-popover border">
-            <DropdownMenuItem
-              onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}
-              className="text-popover-foreground hover:bg-accent hover:text-accent-foreground"
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => editor?.chain().focus().setTextAlign("center").run()}
+              className={`size-8 p-0 hover:bg-accent flex-shrink-0 ${
+                editorState?.isAlignCenter
+                  ? "bg-accent text-accent-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
             >
-              Heading 1
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
-              className="text-popover-foreground hover:bg-accent hover:text-accent-foreground"
+              <AlignCenter className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => editor?.chain().focus().setTextAlign("right").run()}
+              className={`size-8 p-0 hover:bg-accent flex-shrink-0 ${
+                editorState?.isAlignRight
+                  ? "bg-accent text-accent-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
             >
-              Heading 2
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}
-              className="text-popover-foreground hover:bg-accent hover:text-accent-foreground"
+              <AlignRight className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => editor?.chain().focus().setTextAlign("justify").run()}
+              className={`size-8 p-0 hover:bg-accent flex-shrink-0 ${
+                editorState?.isAlignJustify
+                  ? "bg-accent text-accent-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
             >
-              Heading 3
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => editor?.chain().focus().setParagraph().run()}
-              className="text-popover-foreground hover:bg-accent hover:text-accent-foreground"
-            >
-              Paragraph
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <AlignJustify className="h-4 w-4" />
+            </Button>
+          </div>
 
-        {/* Lists */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => editor?.chain().focus().toggleBulletList().run()}
-          className={`size-8 p-0 hover:bg-accent ${
-            editorState?.isBulletList
-              ? "bg-accent text-accent-foreground"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <List className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => editor?.chain().focus().toggleOrderedList().run()}
-          className={`size-8 p-0 hover:bg-accent ${
-            editorState?.isOrderedList
-              ? "bg-accent text-accent-foreground"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <ListOrdered className="h-4 w-4" />
-        </Button>
-        <div className="w-px h-6 bg-border mx-1" />
+          {/* Mobile Alignment Dropdown */}
+          <div className="md:hidden">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="size-8 p-0 text-muted-foreground hover:text-foreground hover:bg-accent flex-shrink-0"
+                >
+                  <AlignLeft className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-popover border">
+                <DropdownMenuItem
+                  onClick={() => editor?.chain().focus().setTextAlign("left").run()}
+                  className="text-popover-foreground hover:bg-accent hover:text-accent-foreground"
+                >
+                  <AlignLeft className="h-4 w-4 mr-2" />
+                  Left
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => editor?.chain().focus().setTextAlign("center").run()}
+                  className="text-popover-foreground hover:bg-accent hover:text-accent-foreground"
+                >
+                  <AlignCenter className="h-4 w-4 mr-2" />
+                  Center
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => editor?.chain().focus().setTextAlign("right").run()}
+                  className="text-popover-foreground hover:bg-accent hover:text-accent-foreground"
+                >
+                  <AlignRight className="h-4 w-4 mr-2" />
+                  Right
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => editor?.chain().focus().setTextAlign("justify").run()}
+                  className="text-popover-foreground hover:bg-accent hover:text-accent-foreground"
+                >
+                  <AlignJustify className="h-4 w-4 mr-2" />
+                  Justify
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
 
-        {/* Text Formatting */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => editor?.chain().focus().toggleBold().run()}
-          disabled={!editorState?.canBold}
-          className={`size-8 p-0 hover:bg-accent ${
-            editorState?.isBold ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <Bold className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => editor?.chain().focus().toggleItalic().run()}
-          disabled={!editorState?.canItalic}
-          className={`size-8 p-0 hover:bg-accent ${
-            editorState?.isItalic ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <Italic className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => editor?.chain().focus().toggleStrike().run()}
-          disabled={!editorState?.canStrike}
-          className={`size-8 p-0 hover:bg-accent ${
-            editorState?.isStrike ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <Strikethrough className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => editor?.chain().focus().toggleCode().run()}
-          disabled={!editorState?.canCode}
-          className={`size-8 p-0 hover:bg-accent ${
-            editorState?.isCode ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <Code className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => editor?.chain().focus().toggleUnderline().run()}
-          disabled={!editorState?.canUnderline}
-          className={`size-8 p-0 hover:bg-accent ${
-            editorState?.isUnderline
-              ? "bg-accent text-accent-foreground"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <UnderlineIcon className="h-4 w-4" />
-        </Button>
-        <div className="w-px h-6 bg-border mx-1" />
+          {/* Spacer */}
+          <div className="flex-1 min-w-4" />
 
-        {/* Additional Tools */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={toggleLink}
-          className={`size-8 p-0 hover:bg-accent ${
-            editorState?.isLink ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <LinkIcon className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => editor?.chain().focus().toggleSuperscript().run()}
-          className={`size-8 p-0 hover:bg-accent ${
-            editorState?.isSuperscript
-              ? "bg-accent text-accent-foreground"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <SuperscriptIcon className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => editor?.chain().focus().toggleSubscript().run()}
-          className={`size-8 p-0 hover:bg-accent ${
-            editorState?.isSubscript
-              ? "bg-accent text-accent-foreground"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <SubscriptIcon className="h-4 w-4" />
-        </Button>
-        <div className="w-px h-6 bg-border mx-1" />
-
-        {/* Alignment */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => editor?.chain().focus().setTextAlign("left").run()}
-          className={`size-8 p-0 hover:bg-accent ${
-            editorState?.isAlignLeft
-              ? "bg-accent text-accent-foreground"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <AlignLeft className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => editor?.chain().focus().setTextAlign("center").run()}
-          className={`size-8 p-0 hover:bg-accent ${
-            editorState?.isAlignCenter
-              ? "bg-accent text-accent-foreground"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <AlignCenter className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => editor?.chain().focus().setTextAlign("right").run()}
-          className={`size-8 p-0 hover:bg-accent ${
-            editorState?.isAlignRight
-              ? "bg-accent text-accent-foreground"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <AlignRight className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => editor?.chain().focus().setTextAlign("justify").run()}
-          className={`size-8 p-0 hover:bg-accent ${
-            editorState?.isAlignJustify
-              ? "bg-accent text-accent-foreground"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <AlignJustify className="h-4 w-4" />
-        </Button>
-
-        {/* Spacer */}
-        <div className="flex-1" />
-
-        {/* Add Button */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={insertContent}
-          className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-accent gap-1"
-        >
-          <Plus className="h-4 w-4" />
-          Add
-        </Button>
+          {/* Add Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={insertContent}
+            className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-accent gap-1 flex-shrink-0"
+          >
+            <Plus className="h-4 w-4" />
+            <span className="hidden sm:inline">Add</span>
+          </Button>
+        </div>
       </div>
 
-      {/* Editor Content */}
-      <div className="min-h-96 p-6 bg-card">
+      {/* Editor Content - Responsive padding */}
+      <div className="min-h-96 p-3 sm:p-4 lg:p-6 bg-card">
         <EditorContent
           editor={editor}
-          className="prose prose-neutral dark:prose-invert max-w-none focus:outline-none [&_.ProseMirror]:focus:outline-none [&_.ProseMirror]:min-h-96 [&_.ProseMirror_h1]:text-3xl [&_.ProseMirror_h1]:font-bold [&_.ProseMirror_h1]:mb-4 [&_.ProseMirror_h2]:text-2xl [&_.ProseMirror_h2]:font-bold [&_.ProseMirror_h2]:mb-3 [&_.ProseMirror_p]:mb-4 [&_.ProseMirror_blockquote]:border-l-4 [&_.ProseMirror_blockquote]:border-border [&_.ProseMirror_blockquote]:pl-4 [&_.ProseMirror_blockquote]:italic [&_.ProseMirror_pre]:bg-muted [&_.ProseMirror_pre]:p-4 [&_.ProseMirror_pre]:rounded [&_.ProseMirror_pre]:overflow-x-auto [&_.ProseMirror_code]:bg-muted [&_.ProseMirror_code]:px-1 [&_.ProseMirror_code]:rounded [&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:pl-6 [&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:pl-6 [&_.ProseMirror_li]:mb-1"
+          className="prose prose-neutral dark:prose-invert max-w-none focus:outline-none [&_.ProseMirror]:focus:outline-none [&_.ProseMirror]:min-h-96 [&_.ProseMirror_h1]:text-2xl sm:[&_.ProseMirror_h1]:text-3xl [&_.ProseMirror_h1]:font-bold [&_.ProseMirror_h1]:mb-4 [&_.ProseMirror_h2]:text-xl sm:[&_.ProseMirror_h2]:text-2xl [&_.ProseMirror_h2]:font-bold [&_.ProseMirror_h2]:mb-3 [&_.ProseMirror_p]:mb-4 [&_.ProseMirror_blockquote]:border-l-4 [&_.ProseMirror_blockquote]:border-border [&_.ProseMirror_blockquote]:pl-4 [&_.ProseMirror_blockquote]:italic [&_.ProseMirror_pre]:bg-muted [&_.ProseMirror_pre]:p-4 [&_.ProseMirror_pre]:rounded [&_.ProseMirror_pre]:overflow-x-auto [&_.ProseMirror_code]:bg-muted [&_.ProseMirror_code]:px-1 [&_.ProseMirror_code]:rounded [&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:pl-6 [&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:pl-6 [&_.ProseMirror_li]:mb-1"
         />
       </div>
     </div>

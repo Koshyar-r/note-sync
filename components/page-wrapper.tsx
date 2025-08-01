@@ -11,6 +11,7 @@ import { ModeToggle } from "./mode-toggle";
 import { Fragment } from "react";
 import { Button } from "./ui/button";
 import Link from "next/link";
+import { ModeSwitcher } from "./mode-switcher";
 
 interface PageWrapperProps {
   children: React.ReactNode;
@@ -47,7 +48,7 @@ export function PageWrapper({ children, breadcrumbs }: PageWrapperProps) {
           </div>
 
           <div className="flex items-center gap-4">
-            <ModeToggle />
+            <ModeSwitcher />
             <Button asChild variant="outline">
                 <Link href="/">
                     <span>Home</span>

@@ -23,7 +23,7 @@ export default async function NotePage({ params }: { params: Params }) {
         { label: note?.title ?? "Note", href: `/dashboard/note/${noteId}` },
       ]}
     >
-      <h1 className="text-3xl">{note?.title}</h1>
+      <h1 className="text-3xl font-bold p-4 text-center">{note?.title}</h1>
       <RichTextEditor
         content={note?.content as JSONContent[]}
         noteId={noteId}
